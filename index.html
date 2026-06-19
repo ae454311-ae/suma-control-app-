@@ -3,234 +3,746 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Suma Control</title>
-
+<title>Suma Control — منصة إدارة شبكات MikroTik و UniFi و OpenWrt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  :root{
+    --bg:#070b13;
+    --bg-soft:#0b121f;
+    --panel:#111a2c;
+    --panel-2:#0e1626;
+    --line:#1f2c44;
+    --text:#eef2fb;
+    --muted:#8c98b3;
+    --muted-2:#5e6c89;
+    --teal:#16e6a8;
+    --teal-dim:#0e8f6b;
+    --amber:#f5a623;
+    --violet:#a855f7;
+    --red-soft:#ff6b6b;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(22,230,168,0.10), transparent 60%),
+      radial-gradient(700px 400px at 0% 0%, rgba(168,85,247,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Tajawal', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  a{ color:inherit; }
+  img{max-width:100%;}
 
-body{
-margin:0;
-font-family:Arial,sans-serif;
-background:#070b12;
-color:white;
-}
+  ::selection{ background:rgba(22,230,168,0.3); }
+  :focus-visible{ outline:2px solid var(--teal); outline-offset:3px; border-radius:6px; }
 
-header{
-padding:80px 20px;
-text-align:center;
-background:linear-gradient(135deg,#0b1320,#111d2f);
-}
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
 
-header h1{
-font-size:48px;
-margin-bottom:10px;
-}
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(7,11,19,0.78);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .nav-inner{
+    max-width:1180px; margin:0 auto; padding:16px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-weight:900; font-size:20px; letter-spacing:0.2px;
+  }
+  .logo-mark{
+    width:34px; height:34px; border-radius:9px;
+    background:linear-gradient(135deg, var(--teal), #0aa57c);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 1px rgba(22,230,168,0.25), 0 8px 20px -8px rgba(22,230,168,0.6);
+  }
+  .logo-mark svg{ width:18px; height:18px; }
+  .logo small{ display:block; font-size:10.5px; color:var(--muted-2); font-weight:500; letter-spacing:0.5px;}
 
-header p{
-font-size:20px;
-color:#bfc8d4;
-}
+  .nav-links{ display:flex; gap:30px; font-size:15px; color:var(--muted); }
+  .nav-links a{ text-decoration:none; transition:color .2s; position:relative; }
+  .nav-links a:hover{ color:var(--text); }
 
-.btn{
-display:inline-block;
-margin-top:20px;
-padding:14px 28px;
-background:#00c896;
-color:white;
-text-decoration:none;
-border-radius:10px;
-font-weight:bold;
-}
+  .nav-cta{
+    display:flex; align-items:center; gap:14px;
+  }
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:11px 22px;
+    border-radius:11px;
+    font-weight:700; font-size:14.5px;
+    text-decoration:none;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--teal), #0fb88a);
+    color:#04140e;
+    box-shadow:0 10px 24px -10px rgba(22,230,168,0.65);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 14px 28px -10px rgba(22,230,168,0.8); }
+  .btn-ghost{
+    background:transparent; color:var(--text); border-color:var(--line);
+  }
+  .btn-ghost:hover{ border-color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.03); }
 
-.section{
-padding:60px 20px;
-max-width:1100px;
-margin:auto;
-}
+  .nav-burger{ display:none; }
 
-.section h2{
-text-align:center;
-margin-bottom:40px;
-font-size:36px;
-}
+  /* ---------- HERO ---------- */
+  header.hero{
+    padding:90px 0 70px;
+    position:relative;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    gap:56px;
+    align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:12.5px; letter-spacing:0.5px;
+    color:var(--teal);
+    background:rgba(22,230,168,0.08);
+    border:1px solid rgba(22,230,168,0.25);
+    padding:7px 14px; border-radius:100px;
+    margin-bottom:22px;
+  }
+  .pulse-dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--teal);
+    box-shadow:0 0 0 0 rgba(22,230,168,0.7);
+    animation:pulse 1.8s infinite;
+  }
+  @keyframes pulse{
+    0%{ box-shadow:0 0 0 0 rgba(22,230,168,0.55); }
+    70%{ box-shadow:0 0 0 9px rgba(22,230,168,0); }
+    100%{ box-shadow:0 0 0 0 rgba(22,230,168,0); }
+  }
+  h1.headline{
+    font-size:54px;
+    line-height:1.18;
+    font-weight:900;
+    margin:0 0 22px;
+    letter-spacing:-0.5px;
+  }
+  h1.headline .accent{
+    background:linear-gradient(90deg, var(--teal), #6be8c9 60%, var(--violet));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .hero-sub{
+    font-size:18.5px;
+    line-height:1.85;
+    color:var(--muted);
+    max-width:520px;
+    margin-bottom:34px;
+  }
+  .hero-actions{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:38px; }
+  .btn-lg{ padding:15px 28px; font-size:15.5px; border-radius:13px; }
 
-.features{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:20px;
-}
+  .hero-meta{
+    display:flex; gap:34px; flex-wrap:wrap;
+    padding-top:26px; border-top:1px solid var(--line);
+  }
+  .hero-meta .item{ display:flex; flex-direction:column; gap:3px; }
+  .hero-meta .num{ font-family:'JetBrains Mono', monospace; font-size:22px; font-weight:700; color:var(--text); }
+  .hero-meta .lbl{ font-size:12.5px; color:var(--muted-2); }
 
-.card{
-background:#111827;
-padding:25px;
-border-radius:15px;
-}
+  /* signature console */
+  .console{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04);
+    overflow:hidden;
+    position:relative;
+  }
+  .console::before{
+    content:"";
+    position:absolute; inset:-1px;
+    background:radial-gradient(400px 200px at 80% 0%, rgba(22,230,168,0.12), transparent 60%);
+    pointer-events:none;
+  }
+  .console-bar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 16px;
+    border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,0.015);
+  }
+  .console-dots{ display:flex; gap:7px; }
+  .console-dots span{ width:10px; height:10px; border-radius:50%; }
+  .console-dots span:nth-child(1){ background:#ff6259; }
+  .console-dots span:nth-child(2){ background:#ffbd2e; }
+  .console-dots span:nth-child(3){ background:#28c840; }
+  .console-title{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--muted-2);
+    direction:ltr;
+  }
+  .console-body{ padding:20px; }
+  .router-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 14px;
+    background:var(--bg-soft);
+    border:1px solid var(--line);
+    border-radius:12px;
+    margin-bottom:10px;
+  }
+  .router-id{ display:flex; align-items:center; gap:11px; }
+  .router-glyph{
+    width:36px; height:36px; border-radius:9px;
+    background:rgba(22,230,168,0.1);
+    border:1px solid rgba(22,230,168,0.25);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .router-glyph svg{ width:18px; height:18px; color:var(--teal); }
+  .router-name{ font-weight:700; font-size:14.5px; }
+  .router-ip{ font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--muted-2); direction:ltr; }
+  .router-status{
+    display:flex; align-items:center; gap:7px;
+    font-family:'JetBrains Mono', monospace; font-size:11.5px;
+    color:var(--teal);
+  }
+  .router-status.warn{ color:var(--amber); }
+  .dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
 
-.card h3{
-margin-top:0;
-color:#00c896;
-}
+  .console-stats{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px;
+  }
+  .stat-box{
+    background:var(--bg-soft); border:1px solid var(--line); border-radius:12px;
+    padding:14px 12px; text-align:center;
+  }
+  .stat-box .v{ font-family:'JetBrains Mono', monospace; font-size:19px; font-weight:700; color:var(--text); }
+  .stat-box .l{ font-size:11px; color:var(--muted-2); margin-top:4px; }
+  .stat-box.live .v{ color:var(--teal); }
 
-.pricing{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-gap:20px;
-}
+  .bars{ display:flex; align-items:flex-end; gap:3px; height:26px; margin-top:8px; justify-content:center; }
+  .bars i{ display:block; width:4px; background:var(--teal); border-radius:2px; opacity:0.85; animation:bar 1.4s ease-in-out infinite; }
+  .bars i:nth-child(1){ height:40%; animation-delay:0s; }
+  .bars i:nth-child(2){ height:70%; animation-delay:.15s; }
+  .bars i:nth-child(3){ height:100%; animation-delay:.3s; }
+  .bars i:nth-child(4){ height:55%; animation-delay:.45s; }
+  .bars i:nth-child(5){ height:85%; animation-delay:.6s; }
+  @keyframes bar{ 0%,100%{ transform:scaleY(0.6); } 50%{ transform:scaleY(1); } }
 
-.price{
-background:#111827;
-padding:30px;
-border-radius:15px;
-text-align:center;
-}
+  /* ---------- marquee of device brands ---------- */
+  .brands{
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    padding:22px 0; background:rgba(255,255,255,0.012);
+  }
+  .brands-inner{
+    display:flex; align-items:center; justify-content:center; gap:46px; flex-wrap:wrap;
+    font-family:'JetBrains Mono', monospace; font-size:14px; color:var(--muted-2); letter-spacing:1px;
+  }
+  .brands-inner span{ display:flex; align-items:center; gap:8px; }
+  .brands-inner b{ color:var(--text); font-weight:700; }
 
-.price h3{
-font-size:28px;
-}
+  /* ---------- SECTION shared ---------- */
+  section{ padding:104px 0; }
+  .section-head{ text-align:center; max-width:640px; margin:0 auto 56px; }
+  .section-eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12.5px; letter-spacing:1.5px;
+    color:var(--teal); text-transform:uppercase; margin-bottom:14px; display:block;
+  }
+  .section-title{ font-size:36px; font-weight:900; margin:0 0 16px; line-height:1.3; }
+  .section-desc{ color:var(--muted); font-size:16.5px; line-height:1.8; }
 
-.price .amount{
-font-size:40px;
-color:#00c896;
-}
+  /* ---------- FEATURES ---------- */
+  .feat-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:18px;
+  }
+  .feat-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:28px 24px;
+    transition:transform .25s ease, border-color .25s ease, background .25s ease;
+  }
+  .feat-card:hover{
+    transform:translateY(-4px);
+    border-color:rgba(22,230,168,0.35);
+    background:linear-gradient(180deg, var(--panel), #0f1a2c);
+  }
+  .feat-icon{
+    width:46px; height:46px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(22,230,168,0.1); border:1px solid rgba(22,230,168,0.22);
+    margin-bottom:18px;
+  }
+  .feat-icon svg{ width:22px; height:22px; color:var(--teal); }
+  .feat-card.violet .feat-icon{ background:rgba(168,85,247,0.1); border-color:rgba(168,85,247,0.25); }
+  .feat-card.violet .feat-icon svg{ color:var(--violet); }
+  .feat-card.amber .feat-icon{ background:rgba(245,166,35,0.1); border-color:rgba(245,166,35,0.28); }
+  .feat-card.amber .feat-icon svg{ color:var(--amber); }
+  .feat-card h3{ font-size:18.5px; margin:0 0 9px; font-weight:800; }
+  .feat-card p{ font-size:14.5px; color:var(--muted); line-height:1.85; margin:0; }
 
-.blog{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-gap:20px;
-}
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; position:relative; }
+  .step{
+    background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:30px 26px; position:relative;
+  }
+  .step .num{
+    font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--teal);
+    background:rgba(22,230,168,0.1); border:1px solid rgba(22,230,168,0.25);
+    width:fit-content; padding:4px 11px; border-radius:100px; margin-bottom:18px;
+  }
+  .step h3{ font-size:18px; margin:0 0 10px; font-weight:800; }
+  .step p{ color:var(--muted); font-size:14.5px; line-height:1.85; margin:0; }
 
-.post{
-background:#111827;
-padding:20px;
-border-radius:15px;
-}
+  /* ---------- PRICING ---------- */
+  .pricing-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; align-items:stretch; }
+  .price-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:18px;
+    padding:34px 28px; display:flex; flex-direction:column;
+  }
+  .price-card.feat{
+    border-color:rgba(22,230,168,0.4);
+    background:linear-gradient(180deg, rgba(22,230,168,0.05), var(--panel) 40%);
+    position:relative;
+    box-shadow:0 25px 60px -28px rgba(22,230,168,0.35);
+  }
+  .price-tag{
+    position:absolute; top:-13px; right:28px;
+    background:var(--teal); color:#04140e; font-size:12px; font-weight:800;
+    padding:5px 13px; border-radius:100px; font-family:'JetBrains Mono', monospace;
+  }
+  .price-card h3{ font-size:19px; font-weight:800; margin:0 0 6px; }
+  .price-card .tagline{ color:var(--muted-2); font-size:13.5px; margin-bottom:22px; }
+  .price-amount{ display:flex; align-items:baseline; gap:6px; margin-bottom:26px; }
+  .price-amount .num{ font-family:'JetBrains Mono', monospace; font-size:42px; font-weight:700; }
+  .price-amount .per{ color:var(--muted-2); font-size:14px; }
+  .price-list{ list-style:none; padding:0; margin:0 0 28px; display:flex; flex-direction:column; gap:13px; flex:1; }
+  .price-list li{ display:flex; align-items:flex-start; gap:10px; font-size:14.5px; color:var(--text); }
+  .price-list li svg{ width:16px; height:16px; color:var(--teal); flex-shrink:0; margin-top:3px; }
+  .price-list li.off{ color:var(--muted-2); }
+  .price-list li.off svg{ color:var(--muted-2); }
+  .price-card .btn{ justify-content:center; width:100%; }
 
-footer{
-padding:30px;
-text-align:center;
-background:#0b1320;
-color:#999;
-}
+  /* ---------- TESTIMONIAL / TRUST ---------- */
+  .trust{
+    background:var(--panel); border:1px solid var(--line); border-radius:20px;
+    padding:48px; display:grid; grid-template-columns:1fr auto; gap:40px; align-items:center;
+  }
+  .trust-quote{ font-size:21px; line-height:1.75; font-weight:600; }
+  .trust-quote span{ color:var(--teal); }
+  .trust-author{ margin-top:18px; color:var(--muted); font-size:14px; }
+  .trust-stats{ display:flex; gap:30px; }
+  .trust-stats .item{ text-align:center; }
+  .trust-stats .v{ font-family:'JetBrains Mono', monospace; font-size:28px; font-weight:800; color:var(--teal); }
+  .trust-stats .l{ font-size:12px; color:var(--muted-2); margin-top:4px; }
 
+  /* ---------- CONTACT ---------- */
+  .contact-panel{
+    background:linear-gradient(135deg, #0d1b2f, #0b1320 60%);
+    border:1px solid var(--line);
+    border-radius:22px;
+    padding:56px;
+    position:relative;
+    overflow:hidden;
+    text-align:center;
+  }
+  .contact-panel::before{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(500px 260px at 50% -10%, rgba(22,230,168,0.16), transparent 65%);
+    pointer-events:none;
+  }
+  .contact-panel h2{ font-size:32px; font-weight:900; margin:0 0 14px; }
+  .contact-panel p{ color:var(--muted); font-size:16px; max-width:480px; margin:0 auto 34px; line-height:1.8; }
+  .contact-actions{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .contact-direct{
+    margin-top:30px; display:flex; gap:28px; justify-content:center; flex-wrap:wrap;
+    font-family:'JetBrains Mono', monospace; font-size:14.5px; color:var(--muted); direction:ltr;
+  }
+  .contact-direct a{ text-decoration:none; color:var(--text); display:flex; align-items:center; gap:8px; }
+  .contact-direct a:hover{ color:var(--teal); }
+  .contact-direct svg{ width:16px; height:16px; color:var(--teal); }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:40px 0;
+  }
+  .footer-inner{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+  }
+  .footer-inner .logo{ font-size:16px; }
+  .footer-links{ display:flex; gap:24px; font-size:13.5px; color:var(--muted-2); }
+  .footer-links a{ text-decoration:none; }
+  .footer-links a:hover{ color:var(--text); }
+  .footer-copy{ font-size:12.5px; color:var(--muted-2); font-family:'JetBrains Mono', monospace; direction:ltr; text-align:left; }
+
+  /* ---------- WHATSAPP FLOAT ---------- */
+  .wa-float{
+    position:fixed; bottom:24px; left:24px; z-index:60;
+    width:58px; height:58px; border-radius:50%;
+    background:linear-gradient(135deg,#1ed760,#15b557);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 14px 30px -10px rgba(30,215,96,0.6);
+    text-decoration:none;
+    animation:float 3s ease-in-out infinite;
+  }
+  .wa-float svg{ width:28px; height:28px; color:#fff; }
+  @keyframes float{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-6px);} }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 980px){
+    .hero-grid{ grid-template-columns:1fr; }
+    .feat-grid{ grid-template-columns:repeat(2,1fr); }
+    .steps{ grid-template-columns:1fr; }
+    .pricing-grid{ grid-template-columns:1fr; }
+    .trust{ grid-template-columns:1fr; text-align:center; }
+    .trust-stats{ justify-content:center; }
+  }
+  @media (max-width: 680px){
+    .nav-links{ display:none; }
+    h1.headline{ font-size:36px; }
+    .hero-sub{ font-size:16px; }
+    .section-title{ font-size:27px; }
+    .feat-grid{ grid-template-columns:1fr; }
+    header.hero{ padding:50px 0 40px; }
+    section{ padding:70px 0; }
+    .contact-panel{ padding:36px 22px; }
+    .trust{ padding:30px 22px; }
+    .console-stats{ grid-template-columns:1fr 1fr; }
+    .nav-cta .btn-ghost{ display:none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
 </style>
 </head>
-
 <body>
 
-<header>
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#04140e" stroke-width="2.4" stroke-linecap="round"><path d="M2 12h4M9 12h1M14 12h1M19 12h3M6 7l3 5-3 5"/></svg>
+      </div>
+      <div>
+        Suma Control
+        <small class="mono">NETWORK OPS</small>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="#features">المميزات</a>
+      <a href="#how">طريقة العمل</a>
+      <a href="#pricing">الأسعار</a>
+      <a href="#contact">تواصل معنا</a>
+    </div>
+    <div class="nav-cta">
+      <a href="https://wa.me/249919157595" class="btn btn-ghost">واتساب</a>
+      <a href="#contact" class="btn btn-primary">ابدأ الآن</a>
+    </div>
+  </div>
+</nav>
 
-<h1>Suma Control</h1>
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow"><span class="pulse-dot"></span> متصل الآن بـ MikroTik · UniFi · OpenWrt</div>
+      <h1 class="headline">تحكّم كامل في شبكة الهوتسبوت<br>من <span class="accent">شاشة واحدة</span></h1>
+      <p class="hero-sub">
+        Suma Control منصة سودانية مبنية لأصحاب نقاط الإنترنت ومحلات الهوتسبوت — إدارة المستخدمين، طباعة الكروت، ومراقبة الراوترات لحظياً، بدون تعقيد ولا أوامر طرفية.
+      </p>
+      <div class="hero-actions">
+        <a href="https://wa.me/249919157595" class="btn btn-primary btn-lg">
+          تواصل عبر واتساب
+        </a>
+        <a href="#features" class="btn btn-ghost btn-lg">شاهد المميزات</a>
+      </div>
+      <div class="hero-meta">
+        <div class="item">
+          <div class="num">3</div>
+          <div class="lbl">أنظمة راوتر مدعومة</div>
+        </div>
+        <div class="item">
+          <div class="num">&lt; 30s</div>
+          <div class="lbl">وقت إنشاء كرت هوتسبوت</div>
+        </div>
+        <div class="item">
+          <div class="num">24/7</div>
+          <div class="lbl">مراقبة حالة الاتصال</div>
+        </div>
+      </div>
+    </div>
 
-<p>
-منصة متقدمة لإدارة شبكات
-MikroTik و UniFi و OpenWrt
-</p>
+    <div class="console">
+      <div class="console-bar">
+        <div class="console-dots"><span></span><span></span><span></span></div>
+        <div class="console-title">suma-control · live</div>
+        <div></div>
+      </div>
+      <div class="console-body">
+        <div class="router-row">
+          <div class="router-id">
+            <div class="router-glyph">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="14" width="20" height="6" rx="1.5"/><path d="M6 14v-2M10 14v-4M14 14v-3"/><circle cx="18" cy="17" r="1"/></svg>
+            </div>
+            <div>
+              <div class="router-name">MikroTik hAP ac²</div>
+              <div class="router-ip">192.168.88.1</div>
+            </div>
+          </div>
+          <div class="router-status"><span class="dot"></span> متصل</div>
+        </div>
+        <div class="router-row">
+          <div class="router-id">
+            <div class="router-glyph">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="14" width="20" height="6" rx="1.5"/><path d="M6 14v-2M10 14v-4M14 14v-3"/><circle cx="18" cy="17" r="1"/></svg>
+            </div>
+            <div>
+              <div class="router-name">UniFi Dream Router</div>
+              <div class="router-ip">10.0.10.1</div>
+            </div>
+          </div>
+          <div class="router-status"><span class="dot"></span> متصل</div>
+        </div>
+        <div class="router-row" style="margin-bottom:0;">
+          <div class="router-id">
+            <div class="router-glyph">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="14" width="20" height="6" rx="1.5"/><path d="M6 14v-2M10 14v-4M14 14v-3"/><circle cx="18" cy="17" r="1"/></svg>
+            </div>
+            <div>
+              <div class="router-name">OpenWrt — بوابة 2</div>
+              <div class="router-ip">192.168.1.1</div>
+            </div>
+          </div>
+          <div class="router-status warn"><span class="dot"></span> 312ms</div>
+        </div>
 
-<a href="#contact" class="btn">
-تواصل معنا
-</a>
-
+        <div class="console-stats">
+          <div class="stat-box live">
+            <div class="v">214</div>
+            <div class="l">مستخدم نشط</div>
+          </div>
+          <div class="stat-box">
+            <div class="v">38</div>
+            <div class="l">كرت اليوم</div>
+          </div>
+          <div class="stat-box">
+            <div class="v mono">إشارة</div>
+            <div class="bars"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
 
-<section class="section">
-
-<h2>المميزات</h2>
-
-<div class="features">
-
-<div class="card">
-<h3>إدارة الهوتسبوت</h3>
-<p>إنشاء وإدارة المستخدمين والكروت بسهولة.</p>
+<div class="brands">
+  <div class="brands-inner">
+    <span>يدعم <b>MikroTik RouterOS</b></span>
+    <span>·</span>
+    <span><b>Ubiquiti UniFi</b></span>
+    <span>·</span>
+    <span><b>OpenWrt</b></span>
+  </div>
 </div>
 
-<div class="card">
-<h3>مراقبة الشبكة</h3>
-<p>متابعة الأجهزة والاستهلاك والاتصال لحظياً.</p>
-</div>
-
-<div class="card">
-<h3>إدارة الراوترات</h3>
-<p>دعم MikroTik و UniFi و OpenWrt.</p>
-</div>
-
-<div class="card">
-<h3>طباعة الكروت</h3>
-<p>طباعة مباشرة للطابعات الحرارية.</p>
-</div>
-
-</div>
-
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-eyebrow">المميزات</span>
+      <h2 class="section-title">كل أدوات تشغيل الهوتسبوت في تطبيق واحد</h2>
+      <p class="section-desc">بُنيت Suma Control لتناسب طريقة عمل أصحاب نقاط الإنترنت في السودان — من الكافيهات إلى مزودي الأحياء.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+        <h3>إدارة الهوتسبوت</h3>
+        <p>إنشاء المستخدمين والكروت، تحديد المدة والباقة، وتعطيل أي حساب فوراً من شاشة واحدة.</p>
+      </div>
+      <div class="feat-card violet">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8.5 15.5a3.5 3.5 0 0 1 7 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/></svg></div>
+        <h3>مراقبة الشبكة لحظياً</h3>
+        <p>تابع الأجهزة المتصلة، استهلاك البيانات، وقوة الإشارة لكل راوتر بدون الحاجة لفتح Winbox.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+        <h3>إدارة متعددة الراوترات</h3>
+        <p>اربط أجهزة MikroTik و UniFi و OpenWrt في نفس الحساب، وتنقّل بينها بضغطة واحدة.</p>
+      </div>
+      <div class="feat-card amber">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V4h12v5M6 18h12v-5H6v5z"/><rect x="6" y="9" width="12" height="6"/></svg></div>
+        <h3>طباعة كروت احترافية</h3>
+        <p>توليد دفعات كروت وطباعتها مباشرة على الطابعات الحرارية أو ورق A4 بتصميم جاهز.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11z"/></svg></div>
+        <h3>نسخ احتياطي واستعادة</h3>
+        <p>احفظ إعدادات الراوتر وبيانات المستخدمين بضغطة، واستعدها فوراً عند تغيير الجهاز.</p>
+      </div>
+      <div class="feat-card violet">
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></div>
+        <h3>سجلات وتقارير دقيقة</h3>
+        <p>سجل كامل لجلسات الاتصال والكروت المباعة يساعدك على متابعة أرباحك اليومية بدقة.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="section">
-
-<h2>الأسعار</h2>
-
-<div class="pricing">
-
-<div class="price">
-<h3>الخطة المجانية</h3>
-<div class="amount">0$</div>
-<p>10 كروت يومياً</p>
-</div>
-
-<div class="price">
-<h3>الخطة الاحترافية</h3>
-<div class="amount">$9</div>
-<p>عدد غير محدود من الكروت</p>
-</div>
-
-</div>
-
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-eyebrow">طريقة العمل</span>
+      <h2 class="section-title">ثلاث خطوات وتكون جاهزاً للبيع</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num mono">01</div>
+        <h3>اربط راوترك</h3>
+        <p>أدخل عنوان الراوتر وبيانات الدخول مرة واحدة — Suma Control يتعرف على الجهاز تلقائياً سواء MikroTik أو UniFi أو OpenWrt.</p>
+      </div>
+      <div class="step">
+        <div class="num mono">02</div>
+        <h3>أنشئ الباقات والكروت</h3>
+        <p>حدد المدة والسعر، ثم ولّد دفعة كروت جاهزة للطباعة أو للبيع المباشر داخل التطبيق.</p>
+      </div>
+      <div class="step">
+        <div class="num mono">03</div>
+        <h3>راقب وبِع</h3>
+        <p>تابع المستخدمين النشطين والإيراد اليومي من شاشة واحدة، أينما كنت.</p>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="section">
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="section-eyebrow">الأسعار</span>
+      <h2 class="section-title">خطة تناسب حجم شغلك</h2>
+      <p class="section-desc">ابدأ مجاناً، وانتقل للخطة الاحترافية عندما تكبر نقطتك.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>المجانية</h3>
+        <div class="tagline">لتجربة النظام والمشاريع الصغيرة</div>
+        <div class="price-amount"><span class="num">$0</span><span class="per">/ شهرياً</span></div>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> 10 كروت يومياً</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> ربط راوتر واحد</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> مراقبة لحظية أساسية</li>
+          <li class="off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> طباعة دفعات كبيرة</li>
+        </ul>
+        <a href="https://wa.me/249919157595" class="btn btn-ghost">ابدأ مجاناً</a>
+      </div>
 
-<h2>المدونة</h2>
+      <div class="price-card feat">
+        <div class="price-tag">الأكثر طلباً</div>
+        <h3>الاحترافية</h3>
+        <div class="tagline">لأصحاب نقاط الإنترنت والكافيهات</div>
+        <div class="price-amount"><span class="num">$9</span><span class="per">/ شهرياً</span></div>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> عدد غير محدود من الكروت</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> ربط حتى 5 راوترات</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> طباعة حرارية و A4</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> نسخ احتياطي تلقائي</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> دعم فني عبر واتساب</li>
+        </ul>
+        <a href="https://wa.me/249919157595" class="btn btn-primary">اشترك الآن</a>
+      </div>
 
-<div class="blog">
-
-<div class="post">
-<h3>شرح MikroTik Hotspot</h3>
-<p>دليل كامل لإنشاء نظام هوتسبوت.</p>
-</div>
-
-<div class="post">
-<h3>أفضل إعدادات UniFi</h3>
-<p>تحسين التغطية والأداء.</p>
-</div>
-
-<div class="post">
-<h3>مراقبة الشبكات</h3>
-<p>تعلم متابعة الشبكة بشكل احترافي.</p>
-</div>
-
-</div>
-
+      <div class="price-card">
+        <h3>المؤسسات</h3>
+        <div class="tagline">لمشغلي عدة نقاط أو شبكات أحياء</div>
+        <div class="price-amount"><span class="num mono" style="font-size:28px;">تواصل معنا</span></div>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> راوترات غير محدودة</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> حسابات فريق متعددة</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> تقارير مخصصة</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> دعم مباشر بالأولوية</li>
+        </ul>
+        <a href="https://wa.me/249919157595" class="btn btn-ghost">تحدث معنا</a>
+      </div>
+    </div>
+  </div>
 </section>
 
-<section class="section" id="contact">
+<section>
+  <div class="wrap">
+    <div class="trust">
+      <div>
+        <div class="trust-quote">"بقيت أدير شبكتي وأطبع الكروت من تلفوني وأنا في البيت — <span>توفير وقت حقيقي</span> كل يوم."</div>
+        <div class="trust-author">— صاحب نقطة هوتسبوت، الخرطوم</div>
+      </div>
+      <div class="trust-stats">
+        <div class="item">
+          <div class="v">3</div>
+          <div class="l">أنظمة راوتر</div>
+        </div>
+        <div class="item">
+          <div class="v">&lt;30s</div>
+          <div class="l">لإنشاء كرت</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2>الدعم الفني</h2>
-
-<p style="text-align:center">
-
-واتساب:<br>
-
-<a class="btn"
-href="https://wa.me/249XXXXXXXXX">
-تواصل الآن
-</a>
-
-</p>
-
+<section id="contact">
+  <div class="wrap">
+    <div class="contact-panel">
+      <h2>جاهز تدير شبكتك بذكاء؟</h2>
+      <p>تواصل معنا الآن وفعّل حسابك على Suma Control خلال دقائق.</p>
+      <div class="contact-actions">
+        <a href="https://wa.me/249919157595" class="btn btn-primary btn-lg">
+          راسلنا على واتساب
+        </a>
+        <a href="mailto:ae454311@gmail.com" class="btn btn-ghost btn-lg">راسلنا بالبريد</a>
+      </div>
+      <div class="contact-direct">
+        <a href="https://wa.me/249919157595">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.27-1.38a9.9 9.9 0 0 0 4.77 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2z"/></svg>
+          +249 91 915 7595
+        </a>
+        <a href="mailto:ae454311@gmail.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 6 10-6"/></svg>
+          ae454311@gmail.com
+        </a>
+      </div>
+    </div>
+  </div>
 </section>
 
 <footer>
-
-© 2026 Suma Control
-
+  <div class="wrap footer-inner">
+    <div class="logo">
+      <div class="logo-mark" style="width:28px;height:28px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#04140e" stroke-width="2.4" stroke-linecap="round"><path d="M2 12h4M9 12h1M14 12h1M19 12h3M6 7l3 5-3 5"/></svg>
+      </div>
+      Suma Control
+    </div>
+    <div class="footer-links">
+      <a href="#features">المميزات</a>
+      <a href="#pricing">الأسعار</a>
+      <a href="#contact">الدعم الفني</a>
+    </div>
+    <div class="footer-copy">© 2026 Suma Control — Sudan</div>
+  </div>
 </footer>
+
+<a href="https://wa.me/249919157595" class="wa-float" aria-label="تواصل عبر واتساب">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.27-1.38a9.9 9.9 0 0 0 4.77 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm5.84 14.21c-.24.68-1.39 1.3-1.93 1.38-.49.08-1.1.11-1.78-.11-.41-.13-.93-.3-1.6-.59-2.82-1.22-4.66-4.06-4.8-4.25-.14-.19-1.15-1.53-1.15-2.92s.73-2.07 1-2.35c.26-.29.57-.36.76-.36s.38 0 .55.01c.18.01.41-.07.64.49.24.58.81 2 .88 2.14.07.15.12.32.02.51-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.61.17.3.76 1.26 1.64 2.04 1.13 1 2.08 1.32 2.38 1.46.3.15.48.13.66-.08.18-.21.76-.89.97-1.19.2-.3.41-.25.68-.15.28.1 1.76.83 2.06.98.3.15.5.22.57.35.07.13.07.74-.17 1.42z"/></svg>
+</a>
 
 </body>
 </html>
